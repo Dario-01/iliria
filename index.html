@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iliria S.R.L. c. Albanie - Analyse 3D Futuriste</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 255, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 255, 255, 0.03) 3px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 8s linear infinite;
+            opacity: 0.5;
+        }
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+        #container {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, #0a0a0f 0%, #000000 100%);
+        }
+        #canvas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px);
+            pointer-events: none;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(4px, 4px); }
+        }
+        #content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        #content::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(30px);
+            border-radius: 30px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            animation: fadeIn 1.5s ease-in, glowPulse 3s ease-in-out infinite;
+            box-shadow: 0 20px 80px rgba(0, 255, 255, 0.4), inset 0 0 60px rgba(0, 255, 255, 0.05);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 20px 80px rgba(0, 255, 255, 0.4), inset 0 0 60px rgba(0, 255, 255, 0.05); }
+            50% { box-shadow: 0 20px 100px rgba(0, 255, 255, 0.6), inset 0 0 80px rgba(0, 255, 255, 0.1); }
+        }
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00ffff, #00ff88, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 60px rgba(0, 255, 255, 0.8);
+            animation: textGlow 2s ease-in-out infinite;
+        }
+        @keyframes textGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+        .hero p {
+            font-size: 1.3em;
+            color: #a0a0b0;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        .presenters {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .presenter {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 136, 255, 0.2));
+            padding: 18px 35px;
+            border-radius: 25px;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 25px rgba(0, 255, 255, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .presenter:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 15px 50px rgba(0, 255, 255, 0.7);
+            border-color: #00ffff;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 136, 255, 0.3));
+        }
+        .section {
+            margin-bottom: 50px;
+            background: rgba(15, 15, 25, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            animation: slideIn 0.8s ease-out;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .section:hover {
+            background: rgba(15, 15, 25, 0.85);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.4), inset 0 0 40px rgba(0, 255, 255, 0.05);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        h2 {
+            font-size: 2.3em;
+            margin-bottom: 25px;
+            color: #00ffff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid rgba(0, 255, 255, 0.4);
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, transparent);
+            animation: borderExpand 2s ease-in-out infinite;
+        }
+        @keyframes borderExpand {
+            0%, 100% { width: 0; }
+            50% { width: 30%; }
+        }
+        h3 {
+            font-size: 1.7em;
+            margin: 25px 0 15px 0;
+            color: #00ff88;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+        h4 {
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+            color: #0088ff;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 15px rgba(0, 136, 255, 0.5);
+        }
+        .icon {
+            display: inline-flex;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #00ffff, #0088ff);
+            border-radius: 14px;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            box-shadow: 0 8px 30px rgba(0, 255, 255, 0.6);
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(0, 255, 255, 0.6); }
+            50% { box-shadow: 0 8px 40px rgba(0, 255, 255, 0.9), 0 0 20px rgba(0, 255, 255, 0.5); }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 136, 255, 0.1));
+            padding: 35px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+            animation: cardRotate 15s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        @keyframes cardRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.03) rotateX(5deg);
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.6), 0 0 40px rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 136, 255, 0.15));
+        }
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00ffff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            animation: numberGlow 3s ease-in-out infinite;
+        }
+        @keyframes numberGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.4); }
+        }
+        .stat-label {
+            font-size: 1.1em;
+            color: #b0b0c0;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 60px;
+            margin-top: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, #00ffff, #00ff88, #0088ff);
+            border-radius: 3px;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+            animation: lineGlow 2s ease-in-out infinite;
+        }
+        @keyframes lineGlow {
+            0%, 100% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.7); }
+            50% { box-shadow: 0 0 35px rgba(0, 255, 255, 1); }
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .timeline-item:hover {
+            background: rgba(0, 255, 255, 0.12);
+            transform: translateX(15px);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.5);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -52px;
+            top: 30px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #00ffff;
+            box-shadow: 0 0 30px #00ffff;
+            border: 4px solid #0a0a0f;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 30px #00ffff; }
+            50% { box-shadow: 0 0 45px #00ffff, 0 0 15px #00ffff inset; }
+        }
+        .list-item {
+            margin: 18px 0;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.03);
+            border-left: 5px solid #00ffff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .list-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #00ffff, transparent);
+            box-shadow: 0 0 10px #00ffff;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .list-item:hover::before {
+            opacity: 1;
+        }
+        .list-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(15px);
+            border-left-width: 7px;
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+        }
+        .violation-box {
+            background: rgba(255, 0, 100, 0.1);
+            border: 3px solid #ff0088;
+            border-radius: 18px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 10px 40px rgba(255, 0, 100, 0.4);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .violation-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff0088, #ff00ff, #ff0088);
+            border-radius: 18px;
+            z-index: -1;
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .violation-box:hover::before {
+            opacity: 0.5;
+        }
+        .government-box {
+            background: rgba(0, 136, 255, 0.1);
+            border: 3px solid #0088ff;
+            border-radius: 18px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 10px 40px rgba(0, 136, 255, 0.4);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .government-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #0088ff, #00ffff, #0088ff);
+            border-radius: 18px;
+            z-index: -1;
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .government-box:hover::before {
+            opacity: 0.5;
+        }
+        .court-box {
+            background: rgba(0, 255, 136, 0.1);
+            border: 3px solid #00ff88;
+            border-radius: 18px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .court-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ffff, #00ff88);
+            border-radius: 18px;
+            z-index: -1;
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .court-box:hover::before {
+            opacity: 0.5;
+        }
+        .comparative-box {
+            background: rgba(136, 0, 255, 0.1);
+            border: 3px solid #8800ff;
+            border-radius: 18px;
+            padding: 30px;
+            margin: 25px 0;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .comparative-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #8800ff, #ff00ff, #8800ff);
+            border-radius: 18px;
+            z-index: -1;
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .comparative-box:hover::before {
+            opacity: 0.5;
+        }
+        .highlight {
+            color: #00ffff;
+            font-weight: bold;
+        }
+        .warning-text {
+            color: #ff0088;
+            font-weight: bold;
+        }
+        .badge {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #00ffff, #0088ff);
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            color: #000;
+            margin: 6px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.5);
+        }
+        .badge:hover {
+            transform: scale(1.15) rotate(-3deg);
+            box-shadow: 0 8px 30px rgba(0, 255, 255, 0.8);
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+        .column-card {
+            background: rgba(0, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 18px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+        .column-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        .column-card:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .column-card:hover {
+            background: rgba(0, 255, 255, 0.12);
+            transform: translateY(-8px) rotateY(5deg);
+            box-shadow: 0 15px 50px rgba(0, 255, 255, 0.5);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+        .quote-box {
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 5px solid #00ffff;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-style: italic;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .quote-box::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            font-size: 120px;
+            color: rgba(0, 255, 255, 0.1);
+            font-family: Georgia, serif;
+            z-index: -1;
+        }
+        .quote-box:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-left-width: 8px;
+        }
+        .impact-tag {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 18px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 6px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .tag-violation { 
+            background: #ff0088; 
+            color: #fff; 
+            box-shadow: 0 0 15px rgba(255, 0, 136, 0.5);
+        }
+        .tag-violation:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 136, 0.8);
+            transform: scale(1.05);
+        }
+        .tag-success { 
+            background: #00ff88; 
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+        .tag-success:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+            transform: scale(1.05);
+        }
+        .tag-critical { 
+            background: #00ffff; 
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .tag-critical:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container"></div>
+        <div id="content">
+            <!-- HERO -->
+            <div class="hero">
+                <h1>⚖️ ILIRIA S.R.L. c. ALBANIE</h1>
+                <p>Analyse Complète de l'Arrêt CEDH<br>Droit à un Procès Équitable et Délai Raisonnable dans l'Exequatur</p>
+                <div class="presenters">
+                    <div class="presenter">👤 Amir</div>
+                    <div class="presenter">👤 Juan</div>
+                </div>
+            </div>
+
+            <!-- CONTEXTE FACTUEL -->
+            <div class="section">
+                <h2><span class="icon">📋</span>I. Contexte Factuel</h2>
+                
+                <h3>La Sentence Arbitrale (Septembre 1993)</h3>
+                <div class="court-box">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">48.2B</div>
+                            <div class="stat-label">Lires italiennes condamnées (~27M USD)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">+13%</div>
+                            <div class="stat-label">Intérêts annuels</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <strong>Contexte:</strong> Investissement touristique en Albanie post-transition communiste
+                    </div>
+                    <div class="list-item">
+                        <strong>Parties:</strong> Iliria S.R.L. (Italie, en liquidation) vs. État albanais
+                    </div>
+                    <div class="list-item">
+                        <strong>Condamnation:</strong> Inexécution des engagements de l'État albanais
+                    </div>
+                    <div class="list-item">
+                        <strong>Nature:</strong> Sentence purement pécuniaire
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;">Le Parcours Judiciaire Albanese</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>1993 - Sentence Arbitrale</h4>
+                        <p>Condamnation de l'Albanie à verser ~27 millions USD</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>1998 - Demande d'Exequatur</h4>
+                        <p>Iliria introduit la demande devant la Cour d'appel de Tirana</p>
+                        <span class="impact-tag tag-success">Reconnaissance initiale</span>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>Décembre 2003 - Réouverture</h4>
+                        <p>Le Conseil des ministres obtient l'autorisation d'appel hors délai (défaut de notification)</p>
+                        <span class="impact-tag tag-violation">Début des retards</span>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2005 - Annulation</h4>
+                        <p>La Cour suprême annule l'exequatur - l'Albanie aurait dû pouvoir s'y opposer</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2006 - Rejet</h4>
+                        <p>Cour d'appel rejette pour défaut d'habilitation du représentant d'Iliria</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2007 - Annulation CS</h4>
+                        <p>Cour suprême annule: Iliria doit pouvoir régulariser toute irrégularité</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2009 - Nouveau Rejet</h4>
+                        <p>Cour d'appel: sentence contraire aux principes fondamentaux du droit albanais</p>
+                        <span class="impact-tag tag-violation">Ordre public invoqué</span>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2012 - Rejet CS</h4>
+                        <p>Cour suprême rejette l'appel d'Iliria <em>de plano</em> (décision brève et formelle)</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2013 - Annulation CC</h4>
+                        <p>Cour constitutionnelle annule pour motivation insuffisante</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>2013 - Nouveau Rejet CS</h4>
+                        <p>Cour suprême statue à nouveau contre Iliria</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h4>22 Décembre 2015 - Fin</h4>
+                        <p>Cour constitutionnelle rejette le dernier recours d'Iliria</p>
+                        <span class="impact-tag tag-critical">Fin définitive</span>
+                    </div>
+                </div>
+
+                <div class="violation-box" style="margin-top: 30px;">
+                    <h3>⏱️ Durée Totale de la Procédure</h3>
+                    <div class="stat-number" style="font-size: 4em; text-align: center;">17 ans 9 mois</div>
+                    <p style="text-align: center; font-size: 1.2em; margin-top: 15px;">
+                        Du <span class="highlight">11 mars 1998</span> au <span class="highlight">22 décembre 2015</span>
+                    </p>
+                    <div class="stat-number" style="font-size: 3em; text-align: center; margin-top: 20px;">9</div>
+                    <p style="text-align: center; font-size: 1.2em;">Degrés de juridiction examinés</p>
+                </div>
+            </div>
+
+            <!-- PROBLÈME DE DROIT -->
+            <div class="section">
+                <h2><span class="icon">⚖️</span>Problème de Droit</h2>
+                <div class="court-box">
+                    <h3 style="color: #00ffff;">Question Centrale</h3>
+                    <p style="font-size: 1.2em; line-height: 1.8; margin: 20px 0;">
+                        L'Albanie a-t-elle violé l'<span class="highlight">Article 6 § 1 de la Convention européenne des droits de l'homme</span> 
+                        (Droit à un procès équitable) en raison de la <span class="warning-text">durée déraisonnable</span> des procédures 
+                        de reconnaissance (exequatur) de la sentence arbitrale internationale ?
+                    </p>
+                    <span class="badge">Article 6 § 1 CEDH</span>
+                    <span class="badge">Délai Raisonnable</span>
+                    <span class="badge">Exequatur</span>
+                </div>
+            </div>
+
+            <!-- ARGUMENTS DU GOUVERNEMENT -->
+            <div class="section">
+                <h2><span class="icon">🏛️</span>Arguments du Gouvernement Albanais</h2>
+                <div class="government-box">
+                    <h3>Objections Préliminaires</h3>
+                    <div class="list-item">
+                        <strong>1. Représentation invalide:</strong> Iliria en liquidation, pouvoirs du représentant incertains
+                    </div>
+                    <div class="list-item">
+                        <strong>2. Absence de qualité de victime:</strong> L'exequatur a été rejeté au fond par les juridictions internes
+                    </div>
+                    <div class="list-item">
+                        <strong>3. Requête prématurée:</strong> Procédures d'exequatur parallèles en Italie en cours
+                    </div>
+                    <div class="list-item">
+                        <strong>4. Complexité de l'affaire:</strong> La lenteur s'explique par la complexité technique et juridique
+                    </div>
+                    <div class="list-item">
+                        <strong>5. Abus de droit:</strong> Allégation non étayée par le gouvernement
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOLUTION DE LA COUR -->
+            <div class="section">
+                <h2><span class="icon">✅</span>Solution Retenue par la CEDH</h2>
+                
+                <h3>Rejet des Objections Préliminaires</h3>
+                <div class="court-box">
+                    <div class="list-item">
+                        ✓ <strong>Représentation valide:</strong> Procuration du liquidateur confirmée régulière
+                    </div>
+                    <div class="list-item">
+                        ✓ <strong>Qualité de victime maintenue:</strong> Le droit au délai raisonnable est indépendant de l'issue finale
+                    </div>
+                    <div class="list-item">
+                        ✓ <strong>Requête recevable:</strong> Procédure albanaise définitivement close depuis 2015
+                    </div>
+                    <div class="list-item">
+                        ✓ <strong>Complexité insuffisante:</strong> Ne justifie pas 18 ans de procédure
+                    </div>
+                    <div class="list-item">
+                        ✓ <strong>Abus non prouvé:</strong> Aucune preuve fournie par le gouvernement
+                    </div>
+                    <span class="impact-tag tag-success">Requête déclarée RECEVABLE</span>
+                </div>
+
+                <h3 style="margin-top: 40px;">Sur le Fond: Violation Constatée</h3>
+                <div class="violation-box">
+                    <h4 style="color: #fff;">🚨 VIOLATION de l'Article 6 § 1 CEDH</h4>
+                    <p style="font-size: 1.15em; line-height: 1.8; margin: 20px 0;">
+                        La Cour a conclu que la durée globale de la procédure était <span class="warning-text">excessive et incompatible</span> 
+                        avec l'exigence du délai raisonnable.
+                    </p>
+                    
+                    <h4 style="margin-top: 25px;">Analyse des Retards</h4>
+                    <div class="list-item">
+                        <strong>1998-2003 (5 ans 8 mois):</strong> Défaut de signification au Conseil des Ministres - Imputable à l'État
+                    </div>
+                    <div class="list-item">
+                        <strong>Renvois en série:</strong> Annulations répétées révélant des déficiences systémiques
+                    </div>
+                    <div class="list-item">
+                        <strong>2009-2012 (~3 ans):</strong> Période d'inactivité sans audience ni mesure procédurale
+                    </div>
+                    <div class="list-item">
+                        <strong>Erreurs d'application du droit:</strong> Nombreux renvois dus à des erreurs plutôt qu'à la complexité
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;">💰 Satisfaction Équitable (Article 41 CEDH)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">€4,800</div>
+                        <div class="stat-label">Dommage Non Pécuniaire</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">€6,000</div>
+                        <div class="stat-label">Frais et Dépens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">€10,800</div>
+                        <div class="stat-label">Total Accordé</div>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    <p><strong>Note:</strong> Montant dérisoire comparé à la sentence de ~27 millions USD, mais la Cour refuse de spéculer 
+                    sur l'issue qu'aurait eue une procédure conduite dans un délai raisonnable.</p>
+                </div>
+            </div>
+
+            <!-- RAISONNEMENT DES JUGES -->
+            <div class="section">
+                <h2><span class="icon">🔍</span>II. Explication du Raisonnement</h2>
+                
+                <h3>A. Période Pertinente et Imputabilité</h3>
+                <div class="court-box">
+                    <div class="list-item">
+                        <strong>Point de départ:</strong> 11 mars 1998 (rejet du calcul albanais limité à 2009)
+                    </div>
+                    <div class="list-item">
+                        <strong>Durée totale analysée:</strong> 17 ans et 9 mois d'intégralité de la procédure
+                    </div>
+                    <div class="list-item">
+                        <strong>Imputabilité:</strong> Tous les retards attribués aux autorités albanaises
+                    </div>
+                    <div class="list-item">
+                        <strong>"Juggling judiciaire":</strong> Renvois en série révélateurs de déficiences systémiques
+                    </div>
+                    <div class="list-item">
+                        <strong>Périodes d'inactivité:</strong> Aucune diligence démontrée par les juridictions
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 35px;">B. Droit à l'Exécution = Partie Intégrante du Procès Équitable</h3>
+                <div class="violation-box">
+                    <h4>Principe Fondamental</h4>
+                    <p style="font-size: 1.1em; line-height: 1.8; margin: 20px 0;">
+                        La Cour rappelle que l'<span class="highlight">accès à un tribunal</span> inclut le droit à ce que la procédure, 
+                        <span class="highlight">y compris de reconnaissance ou d'exécution d'une décision</span>, se déroule dans un 
+                        <span class="warning-text">délai raisonnable</span>.
+                    </p>
+                    <div class="quote-box">
+                        <p>"L'atteinte réside dans la <strong>lenteur de la justice elle-même</strong>, et non dans le résultat matériel 
+                        de la sentence."</p>
+                    </div>
+                    <div class="list-item">
+                        ✓ Le grief est recevable même si l'exequatur a été refusé au fond
+                    </div>
+                    <div class="list-item">
+                        ✓ L'autonomie du grief tiré de la durée excessive
+                    </div>
+                    <div class="list-item">
+                        ✓ La qualité de victime est indépendante du sort matériel de la sentence
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRITIQUE JURIDIQUE -->
+            <div class="section">
+                <h2><span class="icon">📚</span>III. Critique Juridique</h2>
+                
+                <h3>A. Consécration de la Célérité dans l'Arbitrage Post-Sentence</h3>
+                <div class="court-box">
+                    <h4>Apport de Thomas Clay</h4>
+                    <p style="font-size: 1.1em; line-height: 1.8;">
+                        L'arrêt Iliria est une <span class="highlight">confirmation importante</span> et une transposition claire 
+                        de la jurisprudence classique de la CEDH au contexte spécifique de la reconnaissance et de l'exécution 
+                        des sentences arbitrales internationales.
+                    </p>
+                    <div class="list-item">
+                        <strong>Hornsby c. Grèce (1997):</strong> L'exécution fait partie intégrante du "procès"
+                    </div>
+                    <div class="list-item">
+                        <strong>Burdov c. Russie n°2:</strong> Obligation de célérité dans l'exécution
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 35px;">Analyse de Charlotin</h3>
+                <div class="violation-box">
+                    <h4>🎯 Précédent Majeur pour l'Arbitrage d'Investissement</h4>
+                    <div class="list-item">
+                        <strong>Contexte:</strong> Investisseur étranger avec sentence de ~27M USD contre un État
+                    </div>
+                    <div class="list-item">
+                        <strong>Rapprochement:</strong> Pratique TBI/ECT plutôt qu'arbitrage commercial classique
+                    </div>
+                    <div class="list-item">
+                        <strong>Reconnaissance:</strong> Droit à l'exequatur dans un délai raisonnable
+                    </div>
+                    <div class="list-item">
+                        <strong>Violation autonome:</strong> Indépendante du rejet final pour ordre public
+                    </div>
+                    <div class="list-item">
+                        <strong>Obligation stricte:</strong> Diligence procédurale au stade post-arbitral
+                    </div>
+                    <span class="impact-tag tag-critical">Article 6 § 1 uniquement</span>
+                    <span class="impact-tag tag-violation">N'examine pas l'Article 1 Protocole 1</span>
+                </div>
+
+                <div class="court-box" style="margin-top: 25px;">
+                    <h4>🔗 Ouverture Future: Contrôle Combiné</h4>
+                    <p style="line-height: 1.7;">
+                        L'arrêt s'inscrit dans une jurisprudence reconnaissant la sentence arbitrale comme une 
+                        <span class="highlight">"possession"</span> (BTS Holding c. Slovaquie).
+                    </p>
+                    <p style="margin-top: 15px; line-height: 1.7;">
+                        Ouvre la voie à un <span class="highlight">contrôle combiné futur</span> entre:
+                    </p>
+                    <div class="list-item">✓ Durée excessive des procédures d'exequatur (Art. 6 § 1)</div>
+                    <div class="list-item">✓ Protection du droit de propriété des investisseurs (Art. 1 P1)</div>
+                </div>
+
+                <div class="violation-box" style="margin-top: 25px;">
+                    <h4>🚫 Signal Contre le "Juggling Judiciaire"</h4>
+                    <div class="list-item">
+                        <strong>Condamnation:</strong> Renvois en série et périodes d'inactivité
+                    </div>
+                    <div class="list-item">
+                        <strong>Déficiences systémiques:</strong> Révélées par les pratiques dilatoires
+                    </div>
+                    <div class="list-item">
+                        <strong>Ligne "tolérance zéro":</strong> Refus d'imputer les retards au requérant
+                    </div>
+                    <div class="list-item">
+                        <strong>Excuses rejetées:</strong> Ni complexité, ni congestion, ni réformes ne justifient 17 ans
+                    </div>
+                </div>
+
+                <div class="government-box" style="margin-top: 25px;">
+                    <h4>⚖️ Garanties Applicables à l'Exequatur</h4>
+                    <p style="margin-bottom: 15px;">
+                        Bien que l'arrêt repose sur la durée raisonnable, <span class="highlight">toutes les garanties de l'article 6 § 1</span> 
+                        s'appliquent:
+                    </p>
+                    <div class="list-item">✓ Indépendance et impartialité du juge</div>
+                    <div class="list-item">✓ Équité de la procédure</div>
+                    <div class="list-item">✓ Égalité des armes</div>
+                    <div class="list-item">✓ Respect du contradictoire</div>
+                    <div class="list-item">⚠️ Un refus arbitraire ou formalisme excessif engage la responsabilité de l'État</div>
+                </div>
+            </div>
+
+            <!-- CRITIQUE ÉCONOMIQUE -->
+            <div class="section">
+                <h2><span class="icon">💸</span>B. Critique Économique: Victoire à la Pyrrhus</h2>
+                
+                <div class="violation-box">
+                    <h3>📊 Disproportion Manifeste</h3>
+                    <div class="two-column">
+                        <div>
+                            <div class="stat-number">€10,800</div>
+                            <p style="font-size: 1.1em;">Indemnisation CEDH</p>
+                        </div>
+                        <div>
+                            <div class="stat-number">$27M</div>
+                            <p style="font-size: 1.1em;">Valeur de la sentence</p>
+                        </div>
+                    </div>
+                    <div class="quote-box" style="margin-top: 25px;">
+                        <p>"Somme <strong>dérisoire</strong> au regard de l'enjeu du litige"</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 35px;">Explication de la Limitation</h3>
+                <div class="court-box">
+                    <div class="list-item">
+                        <strong>Position de la Cour:</strong> Refuse de spéculer sur l'issue d'une procédure diligente
+                    </div>
+                    <div class="list-item">
+                        <strong>Réparation limitée:</strong> Effets du retard en tant que tel, non le résultat matériel
+                    </div>
+                    <div class="list-item">
+                        <strong>Approche restrictive:</strong> Dommage moral uniquement
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 35px;">Contraste avec l'Arbitrage d'Investissement</h3>
+                <div class="comparative-box">
+                    <h4>Tribunaux d'Arbitrage d'Investissement</h4>
+                    <div class="list-item">
+                        ✓ Standards: Traitement juste et équitable, moyens effectifs
+                    </div>
+                    <div class="list-item">
+                        ✓ Sanctions pour retards judiciaires excessifs
+                    </div>
+                    <div class="list-item">
+                        ✓ Indemnisations substantielles liées à la valeur de l'investissement
+                    </div>
+                    <div class="list-item">
+                        <strong>Exemples:</strong> Chevron v. Ecuador, White Industries v. India, Mercuria v. Poland
+                    </div>
+                    
+                    <div class="quote-box" style="margin-top: 25px; background: rgba(136, 0, 255, 0.1);">
+                        <h4 style="color: #00ffff;">Iliria comme "Complément Externe"</h4>
+                        <p style="font-size: 1.05em;">
+                            <strong>CEDH:</strong> Contrôle procédural centré sur la durée raisonnable<br>
+                            <strong>Tribunaux d'investissement:</strong> Sanction financière d'ampleur
+                        </p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 35px;">Effets de l'Arrêt</h3>
+                <div class="two-column">
+                    <div class="column-card">
+                        <h4 style="color: #00ffff;">✅ Impact Réputationnel</h4>
+                        <p>"Naming and shaming" - Stigmatisation procédurale</p>
+                        <p style="margin-top: 15px;">Condamnation pour mauvaise administration de la justice</p>
+                        <span class="impact-tag tag-success">Réel</span>
+                    </div>
+                    <div class="column-card">
+                        <h4 style="color: #ff0088;">⚠️ Effet Dissuasif Économique</h4>
+                        <p>Limité en raison du faible montant de l'indemnisation</p>
+                        <p style="margin-top: 15px;">€10,800 vs $27M = dissuasion minimale</p>
+                        <span class="impact-tag tag-violation">Limité</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JURISPRUDENCE COMPARABLE -->
+            <div class="section">
+                <h2><span class="icon">📖</span>IV. Jurisprudence Comparable</h2>
+                
+                <h3>A. CEDH: Durée de l'Exécution</h3>
+                <div class="court-box">
+                    <h4>🏛️ Hornsby c. Grèce (19 mars 1997)</h4>
+                    <div class="list-item">
+                        <strong>Principe fondateur:</strong> L'exécution d'une décision judiciaire fait partie intégrante du "procès" (Art. 6 § 1)
+                    </div>
+                    <div class="list-item">
+                        <strong>Iliria:</strong> Transpose ce principe à l'exequatur des sentences arbitrales
+                    </div>
+                    <span class="impact-tag tag-critical">Jurisprudence de référence</span>
+                </div>
+
+                <div class="court-box" style="margin-top: 20px;">
+                    <h4>🏛️ Metaxas c. Grèce (27 mai 2004)</h4>
+                    <div class="list-item">
+                        Violation Art. 6 § 1 + Art. 1 P1 pour retard excessif dans paiement de pension
+                    </div>
+                    <div class="list-item">
+                        Le paiement tardif ne répare pas l'omission initiale de l'État
+                    </div>
+                </div>
+
+                <div class="court-box" style="margin-top: 20px;">
+                    <h4>🏛️ Lunari c. Italie (11 janvier 2001)</h4>
+                    <div class="list-item">
+                        Impossibilité prolongée d'exécuter ordonnance d'expulsion = violation Art. 6 § 1
+                    </div>
+                    <div class="list-item">
+                        Charge excessive → violation Art. 1 P1 (droit de propriété)
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;">B. CEDH: Refus d'Exécution des Sentences</h3>
+                <div class="violation-box">
+                    <h4>⚖️ BTS Holding c. Slovaquie (30 juin 2022)</h4>
+                    <div class="list-item">
+                        <strong>Refus arbitraire</strong> d'exécuter sentence arbitrale commerciale
+                    </div>
+                    <div class="list-item">
+                        <strong>Ingérence injustifiée</strong> dans le droit de propriété (Art. 1 P1)
+                    </div>
+                    <div class="quote-box">
+                        <p><strong>Relation avec Iliria:</strong> BTS Holding sanctionne l'<em>arbitraire du refus</em>, 
+                        Iliria sanctionne la <em>durée excessive</em> - Approches complémentaires</p>
+                    </div>
+                    <span class="impact-tag tag-critical">Pendant substantiel</span>
+                </div>
+
+                <div class="violation-box" style="margin-top: 20px;">
+                    <h4>⚖️ Kin-Stib et Majkić c. Serbie</h4>
+                    <div class="list-item">
+                        Non-exécution partielle de sentence arbitrale = atteinte Art. 1 P1
+                    </div>
+                    <div class="list-item">
+                        Obligation positive: l'État doit assurer l'exécution effective des titres
+                    </div>
+                </div>
+
+                <div class="court-box" style="margin-top: 20px;">
+                    <h4>⚖️ NDI Sopot S.A. c. Macédoine du Nord (26 nov. 2024)</h4>
+                    <div class="list-item">
+                        <strong>Prolongement direct</strong> de Iliria et BTS Holding
+                    </div>
+                    <div class="list-item">
+                        Confirme explicitement l'applicabilité de l'Art. 6 § 1 aux procédures d'exequatur
+                    </div>
+                    <div class="list-item">
+                        Consolide la protection européenne sur le plan procédural ET substantiel
+                    </div>
+                    <span class="impact-tag tag-success">Consolidation récente</span>
+                </div>
+
+                <h3 style="margin-top: 40px;">C. Perspectives Comparées</h3>
+                
+                <div class="comparative-box">
+                    <h4>🇨🇴 Colombie: Cour Constitutionnelle</h4>
+                    <p style="margin-bottom: 20px;">
+                        Jurisprudence protectrice sur fondement de l'<span class="highlight">Article 29 de la Constitution</span> 
+                        et des <span class="highlight">acciones de tutela</span>
+                    </p>
+                    
+                    <div class="list-item">
+                        <strong>T-156/09 (2009):</strong> Caducité liée à faute médicale - formalisme excessif portant atteinte au délai raisonnable
+                        → Reprise ordonnée sous 20 jours
+                    </div>
+                    <div class="list-item">
+                        <strong>T-291/17 (2017):</strong> Délais de 5-10 ans violent le due process - Inefficacité des recours internes
+                        → Accélération imposée
+                    </div>
+                    <div class="list-item">
+                        <strong>SU-128/20 (2020):</strong> Unification jurisprudentielle - Exécution dilatoire de décision administrative
+                        = violation constitutionnelle sans recours effectif
+                    </div>
+                    <span class="impact-tag tag-success">Protection forte via tutela</span>
+                </div>
+
+                <div class="comparative-box" style="margin-top: 25px;">
+                    <h4>🇮🇷 Iran: Absence de Sanction de la Lenteur</h4>
+                    <p style="margin-bottom: 20px;">
+                        <span class="warning-text">Pas de jurisprudence</span> sanctionnant le refus ou reconnaissance tardive sur le seul 
+                        fondement de la durée excessive
+                    </p>
+                    
+                    <div class="list-item">
+                        <strong>Contrôle:</strong> Régularité procédurale (notification, contradictoire) + ordre public islamique
+                    </div>
+                    <div class="list-item">
+                        <strong>Retards:</strong> Éléments contextuels révélant vice plus grave, non violation autonome
+                    </div>
+                    <div class="list-item">
+                        <strong>Affaire n° 9309970226600583 (2014):</strong> 3 ans de délai = facteur aggravant, 
+                        censure fondée sur défaut de notification
+                    </div>
+                    <div class="list-item">
+                        <strong>Conséquence:</strong> Marge d'appréciation accrue pour autorités judiciaires, 
+                        procédures potentiellement longues sans recours effectif
+                    </div>
+                    <div class="list-item">
+                        <strong>LICA 1997:</strong> Vise à renforcer attractivité, mais pratique reste marquée par contrôle étatique strict
+                    </div>
+                    <span class="impact-tag tag-violation">Pas d'exigence de célérité</span>
+                </div>
+            </div>
+
+            <!-- PORTÉE ET CONCLUSION -->
+            <div class="section">
+                <h2><span class="icon">🎯</span>Portée de l'Arrêt Iliria</h2>
+                
+                <div class="violation-box">
+                    <h3>🌟 Apports Majeurs</h3>
+                    <div class="list-item">
+                        <strong>1. Extension de l'Art. 6 § 1:</strong> La CEDH confirme que l'exequatur fait partie intégrante du procès équitable
+                    </div>
+                    <div class="list-item">
+                        <strong>2. Droit à l'exequatur diligent:</strong> Reconnaissance explicite d'un droit à l'exequatur dans un délai raisonnable
+                    </div>
+                    <div class="list-item">
+                        <strong>3. Violation autonome:</strong> La durée excessive constitue une violation indépendante du sort matériel de la sentence
+                    </div>
+                    <div class="list-item">
+                        <strong>4. Qualité de victime:</strong> Maintenue même en cas de rejet final de l'exequatur
+                    </div>
+                    <div class="list-item">
+                        <strong>5. Tolérance zéro:</strong> Contre les pratiques dilatoires étatiques et le "juggling judiciaire"
+                    </div>
+                    <div class="list-item">
+                        <strong>6. Protection investisseurs:</strong> Précédent majeur pour détenteurs de sentences contre États du Conseil de l'Europe
+                    </div>
+                </div>
+
+                <div class="court-box" style="margin-top: 30px;">
+                    <h3>⚖️ Obligations des États</h3>
+                    <div class="list-item">
+                        ✓ Diligence procédurale stricte au stade post-arbitral
+                    </div>
+                    <div class="list-item">
+                        ✓ Éviter les renvois en série révélateurs de déficiences systémiques
+                    </div>
+                    <div class="list-item">
+                        ✓ Éviter les périodes d'inactivité injustifiées
+                    </div>
+                    <div class="list-item">
+                        ✓ Garantir toutes les garanties de l'Art. 6 § 1 dans les procédures d'exequatur
+                    </div>
+                    <div class="list-item">
+                        ✓ Ne pas invoquer la complexité, la congestion ou les réformes pour justifier retards excessifs
+                    </div>
+                </div>
+
+                <div class="government-box" style="margin-top: 30px;">
+                    <h3>🔮 Perspectives Futures</h3>
+                    <div class="list-item">
+                        <strong>Contrôle combiné:</strong> Durée excessive (Art. 6 § 1) + Protection propriété (Art. 1 P1)
+                    </div>
+                    <div class="list-item">
+                        <strong>Complémentarité:</strong> CEDH (contrôle procédural) + Tribunaux d'investissement (sanction financière)
+                    </div>
+                    <div class="list-item">
+                        <strong>Extension:</strong> Application à d'autres États membres du Conseil de l'Europe
+                    </div>
+                    <div class="list-item">
+                        <strong>Renforcement:</strong> Protection des créanciers arbitraux sur plans procédural et substantiel
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONCLUSION -->
+            <div class="section">
+                <h2><span class="icon">✨</span>Conclusion</h2>
+                <div class="violation-box">
+                    <p style="font-size: 1.2em; line-height: 1.9; text-align: center;">
+                        L'arrêt <span class="highlight">Iliria S.R.L. c. Albanie</span> marque un tournant dans la protection européenne 
+                        des sentences arbitrales internationales. Il établit une ligne de <span class="warning-text">"tolérance zéro"</span> 
+                        face aux pratiques dilatoires étatiques et impose aux États membres du Conseil de l'Europe une 
+                        <span class="highlight">obligation stricte de célérité</span> dans les procédures d'exequatur.
+                    </p>
+                    <p style="font-size: 1.1em; line-height: 1.8; text-align: center; margin-top: 25px;">
+                        Bien que la réparation accordée soit symbolique (€10,800 vs $27M), l'impact réputationnel et jurisprudentiel 
+                        est considérable, ouvrant la voie à un <span class="highlight">contrôle renforcé</span> tant procédural que substantiel 
+                        de l'exécution des sentences arbitrales.
+                    </p>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <span class="badge">Art. 6 § 1 CEDH</span>
+                        <span class="badge">Délai Raisonnable</span>
+                        <span class="badge">Protection Investisseurs</span>
+                        <span class="badge">Exequatur</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; padding: 40px; background: rgba(0, 255, 255, 0.05); border-radius: 20px; margin-top: 40px; border: 1px solid rgba(0, 255, 255, 0.2);">
+                <p style="font-size: 0.9em; color: #a0a0b0;">Présentation réalisée par Amir et Juan</p>
+                <p style="font-size: 0.9em; color: #a0a0b0; margin-top: 10px;">Analyse juridique de l'arrêt CEDH Iliria S.R.L. c. Albanie</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Three.js 3D Background Animation with Advanced Effects
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0a0f, 0.012);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Create futuristic geometric shapes
+        const geometry1 = new THREE.IcosahedronGeometry(1.2, 0);
+        const geometry2 = new THREE.OctahedronGeometry(1, 0);
+        const geometry3 = new THREE.TetrahedronGeometry(0.8, 0);
+        const geometry4 = new THREE.TorusGeometry(0.7, 0.3, 16, 100);
+        const geometry5 = new THREE.DodecahedronGeometry(0.9, 0);
+
+        const material1 = new THREE.MeshBasicMaterial({ 
+            color: 0x00ffff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+        const material2 = new THREE.MeshBasicMaterial({ 
+            color: 0x00ff88, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+        const material3 = new THREE.MeshBasicMaterial({ 
+            color: 0x0088ff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+        const material4 = new THREE.MeshBasicMaterial({ 
+            color: 0x8800ff, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+        const material5 = new THREE.MeshBasicMaterial({ 
+            color: 0xff0088, 
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4
+        });
+
+        const shapes = [];
+        const geometries = [geometry1, geometry2, geometry3, geometry4, geometry5];
+        const materials = [material1, material2, material3, material4, material5];
+
+        // Create main geometric shapes
+        for (let i = 0; i < 18; i++) {
+            const geom = geometries[Math.floor(Math.random() * geometries.length)];
+            const mat = materials[Math.floor(Math.random() * materials.length)];
+            const mesh = new THREE.Mesh(geom, mat);
+            
+            mesh.position.x = (Math.random() - 0.5) * 35;
+            mesh.position.y = (Math.random() - 0.5) * 35;
+            mesh.position.z = (Math.random() - 0.5) * 35;
+            
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.y = Math.random() * Math.PI;
+            mesh.rotation.z = Math.random() * Math.PI;
+            
+            mesh.userData.rotationSpeed = {
+                x: (Math.random() - 0.5) * 0.012,
+                y: (Math.random() - 0.5) * 0.012,
+                z: (Math.random() - 0.5) * 0.012
+            };
+            
+            mesh.userData.floatSpeed = Math.random() * 0.0015 + 0.0008;
+            mesh.userData.floatOffset = Math.random() * Math.PI * 2;
+            mesh.userData.pulseSpeed = Math.random() * 0.01 + 0.005;
+            
+            scene.add(mesh);
+            shapes.push(mesh);
+        }
+
+        // Create particle system
+        const particleGeometry = new THREE.BufferGeometry();
+        const particleCount = 1200;
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 60;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 60;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+            
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.025,
+                y: (Math.random() - 0.5) * 0.025,
+                z: (Math.random() - 0.5) * 0.025
+            });
+            
+            // Random colors (cyan to blue to green)
+            const colorChoice = Math.random();
+            if (colorChoice < 0.33) {
+                colors[i * 3] = 0; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1; // cyan
+            } else if (colorChoice < 0.66) {
+                colors[i * 3] = 0; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 0.53; // green
+            } else {
+                colors[i * 3] = 0; colors[i * 3 + 1] = 0.53; colors[i * 3 + 2] = 1; // blue
+            }
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.06,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            vertexColors: true
+        });
+
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        // Add connecting lines between particles (selective)
+        const lineGeometry = new THREE.BufferGeometry();
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.1,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const linePositions = [];
+        for (let i = 0; i < 50; i++) {
+            const idx1 = Math.floor(Math.random() * particleCount);
+            const idx2 = Math.floor(Math.random() * particleCount);
+            linePositions.push(
+                positions[idx1 * 3], positions[idx1 * 3 + 1], positions[idx1 * 3 + 2],
+                positions[idx2 * 3], positions[idx2 * 3 + 1], positions[idx2 * 3 + 2]
+            );
+        }
+        lineGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePositions), 3));
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+
+        camera.position.z = 15;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            
+            // Animate main shapes
+            shapes.forEach(shape => {
+                shape.rotation.x += shape.userData.rotationSpeed.x;
+                shape.rotation.y += shape.userData.rotationSpeed.y;
+                shape.rotation.z += shape.userData.rotationSpeed.z;
+                
+                shape.position.y += Math.sin(time * shape.userData.floatSpeed + shape.userData.floatOffset) * 0.004;
+                shape.position.x += Math.cos(time * shape.userData.floatSpeed * 0.7 + shape.userData.floatOffset) * 0.003;
+                
+                // Pulsing opacity and scale
+                shape.material.opacity = 0.25 + Math.sin(time * shape.userData.pulseSpeed + shape.userData.floatOffset) * 0.2;
+                const scale = 1 + Math.sin(time * shape.userData.pulseSpeed * 0.5) * 0.1;
+                shape.scale.set(scale, scale, scale);
+            });
+            
+            // Animate particles
+            const positions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] += velocities[i].x;
+                positions[i * 3 + 1] += velocities[i].y;
+                positions[i * 3 + 2] += velocities[i].z;
+                
+                // Boundary check with smoother wrap
+                if (Math.abs(positions[i * 3]) > 30) velocities[i].x *= -1;
+                if (Math.abs(positions[i * 3 + 1]) > 30) velocities[i].y *= -1;
+                if (Math.abs(positions[i * 3 + 2]) > 30) velocities[i].z *= -1;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Rotate particle system slowly
+            particles.rotation.y += 0.0003;
+            particles.rotation.x += 0.0002;
+            
+            // Pulse lines opacity
+            lines.material.opacity = 0.05 + Math.sin(time * 0.5) * 0.05;
+            lines.rotation.y += 0.0002;
+            
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Enhanced parallax scroll effect with mouse movement
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+            camera.rotation.y += (mouseX * 0.1 - camera.rotation.y) * 0.05;
+        });
+
+        document.getElementById('content').addEventListener('scroll', (e) => {
+            const scrollY = e.target.scrollTop;
+            camera.position.y = scrollY * 0.0025;
+            camera.rotation.x = scrollY * 0.00015;
+            camera.position.z = 15 + scrollY * 0.002;
+            
+            // Rotate shapes based on scroll
+            shapes.forEach((shape, i) => {
+                shape.rotation.z += scrollY * 0.000015 * (i % 2 === 0 ? 1 : -1);
+            });
+        });
+    </script>
+</body>
+</html>
